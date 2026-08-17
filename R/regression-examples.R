@@ -131,4 +131,71 @@ tbl_merge(list(tbl_no_int, tbl_int),
   tab_spanner = c("**Model 1**", "**Model 2**")
 )
 
+###########################################################################
+
+#STEP 3
+# regression of sex on a series of predictor (x) variables
+tbl_uvregression(
+	nlsy,
+	x = sex_cat,
+	include = c(
+		nsibs, sleep_wkdy, sleep_wknd, income
+	),
+	method = lm
+)
+
+#STEP 4
+# Fit a Poisson regression (family = poisson()) for the number of siblings,
+# using at least 3 predictors of your choice. Create a nice table displaying
+# your Poisson regression and its exponentiated coefficients.
+
+poisson_model <- glm(nsibs ~ eyesight_cat + sex_cat + income,
+										 data = nlsy, family = poisson()
+)
+
+tbl_regression(
+	poisson_model,
+	exponentiate = TRUE,
+	label = list(
+		sex_cat ~ "Sex",
+		eyesight_cat ~ "Eyesight",
+		income ~ "Income (USD)"
+	)
+)
+
+
+
+#STEP 5
+# Instead of odds ratios for wearing glasses, as in the example in the slides.,
+# we want risk ratios. We can do this by specifying in the regression family =
+# binomial(link = "log"). Regress glasses on eyesight_cat and sex_cat and create
+# a table showing the risk ratios and confidence intervals from this regression.
+
+logbinomial_model <- glm(glasses ~ eyesight_cat + sex_cat,
+												 data = nlsy, family = binomial(link = "log")
+)
+
+logistic_table <- tbl_regression(
+	logistic_model,
+	exponentiate = TRUE,
+	label = list(
+		sex_cat ~ "Sex",
+		eyesight_cat ~ "Eyesight"
+	)
+)
+
+logbinomial_table <- tbl_regression(
+	logbinomial_model,
+	exponentiate = TRUE,
+	label = list(
+		sex_cat ~ "Sex",
+		eyesight_cat ~ "Eyesight"
+	)
+)
+
+tbl_merge(list(logistic_table, logbinomial_table),
+					tab_spanner = c("**Logistic**", "**Log-binomial**")
+)
+
+
 

@@ -81,4 +81,71 @@ tbl_summary(
   # add a caption
   modify_caption("**Participant characteristics**")
 
+###############################################################################
 
+# STEP 3: simple table
+tbl_summary(
+	nlsy,
+	by = sex_cat,
+	include = c(
+		sex_cat, race_eth_cat, region_cat,
+		starts_with("sleep"), income ) ,
+	label = list(
+		race_eth_cat ~ "Race/ethnicity",
+		region_cat ~ "Region",
+		sleep_wkdy ~  "Amount of Sleep on Weekend",
+		sleep_wknd ~ "Amount of Sleep on Weekday",
+		income ~ "Income"
+	) )
+
+
+# STEP 4: add p-values, a total column, bold labels, and remove the footnote
+tbl_summary(
+	nlsy,
+	by = sex_cat,
+	include = c(
+		sex_cat, race_eth_cat, region_cat,
+		starts_with("sleep"), income ) ,
+	label = list(
+		race_eth_cat ~ "Race/ethnicity",
+		region_cat ~ "Region",
+		sleep_wkdy ~  "Amount of Sleep on Weekend",
+		sleep_wknd ~ "Amount of Sleep on Weekday",
+		income ~ "Income"
+	)) |>
+# change the test used to compare sex_cat groups
+add_p(test = list(
+	all_continuous() ~ "t.test",
+	all_categorical() ~ "chisq.test"
+)) |>
+	# add a total column with the number of observations
+	add_overall(col_label = "**Total** N = {N}")
+
+#STEP 5 AND 6
+tbl_summary(nlsy,
+						include = c(region_cat, race_eth_cat, income,
+												starts_with("sleep")),
+						by = sex_cat,
+						digits = list(income ~ 3,
+													starts_with("sleep") ~ 1),
+						statistic = list(income ~ "{p10}, {p90}",
+														 starts_with("sleep") ~ "{min}, {max}"),
+						label = list(
+							race_eth_cat ~ "Race/ethnicity",
+							region_cat ~ "Region",
+							income ~ "Income",
+							sleep_wkdy ~ "Sleep on weekdays",
+							sleep_wknd ~ "Sleep on weekends"
+						)) |>
+	# change the test used to compare sex_cat groups
+	add_p(test = list(
+		all_continuous() ~ "t.test",
+		all_categorical() ~ "chisq.test"
+	)) |>
+	# add a total column with the number of observations
+	add_overall(col_label = "**Total** N = {N}")|>
+	modify_footnote_body(
+		footnote = "https://www.nlsinfo.org/content/cohorts/nlsy79/topical-guide/household/race-ethnicity-immigration-data",
+		columns = "label",
+		rows = variable == "race_eth_cat" & row_type == "label"
+	)
